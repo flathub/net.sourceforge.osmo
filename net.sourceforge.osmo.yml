@@ -26,8 +26,8 @@ modules:
           - /bin
         sources:
           - type: archive
-            url: https://github.com/AbiWord/enchant/releases/download/v2.6.5/enchant-2.6.5.tar.gz
-            sha256: 9e8fd28cb65a7b6da3545878a5c2f52a15f03c04933a5ff48db89fe86845728e
+            url: https://github.com/AbiWord/enchant/releases/download/v2.6.9/enchant-2.6.9.tar.gz
+            sha256: d9a5a10dc9b38a43b3a0fa22c76ed6ebb7e09eb535aff62954afcdbd40efff6b
             x-checker-data:
               type: anitya
               project-id: 6601
@@ -58,8 +58,8 @@ modules:
       - -DICAL_BUILD_DOCS=false
     sources:
       - type: archive
-        url: https://github.com/libical/libical/releases/download/v3.0.17/libical-3.0.17.tar.gz
-        sha256: bcda9a6db6870240328752854d1ea475af9bbc6356e6771018200e475e5f781b
+        url: https://github.com/libical/libical/releases/download/v3.0.18/libical-3.0.18.tar.gz
+        sha256: 72b7dc1a5937533aee5a2baefc990983b66b141dd80d43b51f80aced4aae219c
         x-checker-data:
           type: anitya
           project-id: 1637

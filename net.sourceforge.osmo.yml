@@ -3,7 +3,7 @@ runtime: org.freedesktop.Platform
 runtime-version: '22.08'
 sdk: org.freedesktop.Sdk
 rename-desktop-file: osmo.desktop
-rename-icon-file: osmo
+rename-icon: osmo
 command: osmo
 
 finish-args:

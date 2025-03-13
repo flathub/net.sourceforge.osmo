@@ -34,12 +34,18 @@ modules:
               url-template: https://github.com/AbiWord/enchant/releases/download/v$version/enchant-$version.tar.gz
     cleanup:
       - /bin
+    buildsystem: meson
     config-opts:
-      - --disable-vala
+      - -Dgspell_app=false
+      - -Dgobject_introspection=false
+      - -Dvapi=false
+      - -Dgtk_doc=false
+      - -Dtests=false
+      - -Dinstall_tests=false
     sources:
       - type: archive
-        url: https://download.gnome.org/sources/gspell/1.12/gspell-1.12.2.tar.xz
-        sha256: b4e993bd827e4ceb6a770b1b5e8950fce3be9c8b2b0cbeb22fdf992808dd2139
+        url: https://download.gnome.org/sources/gspell/1.14/gspell-1.14.0.tar.xz
+        sha256: 64ea1d8e9edc1c25b45a920e80daf67559d1866ffcd7f8432fecfea6d0fe8897
         x-checker-data:
           type: gnome
           name: gspell
@@ -58,8 +64,8 @@ modules:
       - -DICAL_BUILD_DOCS=false
     sources:
       - type: archive
-        url: https://github.com/libical/libical/releases/download/v3.0.19/libical-3.0.19.tar.gz
-        sha256: 6a1e7f0f50a399cbad826bcc286ce10d7151f3df7cc103f641de15160523c73f
+        url: https://github.com/libical/libical/releases/download/v3.0.20/libical-3.0.20.tar.gz
+        sha256: e73de92f5a6ce84c1b00306446b290a2b08cdf0a80988eca0a2c9d5c3510b4c2
         x-checker-data:
           type: anitya
           project-id: 1637

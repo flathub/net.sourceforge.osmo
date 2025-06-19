@@ -118,7 +118,7 @@ modules:
           - cp -p /usr/share/automake-*/config.{sub,guess} .
 
   - name: osmo
-    build-system: autotools
+    buildsystem: autotools
     post-install:
       - install -Dm 644 ${FLATPAK_ID}.metainfo.xml ${FLATPAK_DEST}/share/metainfo/${FLATPAK_ID}.metainfo.xml
     sources:

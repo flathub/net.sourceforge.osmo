@@ -1,6 +1,6 @@
 app-id: net.sourceforge.osmo
 runtime: org.freedesktop.Platform
-runtime-version: '23.08'
+runtime-version: '25.08'
 sdk: org.freedesktop.Sdk
 rename-desktop-file: osmo.desktop
 rename-icon: osmo
@@ -12,28 +12,27 @@ finish-args:
   - --socket=wayland
 
 cleanup:
-  - '*.a'
-  - '*.la'
-  - /lib/pkgconfig
   - /include
+  - /lib/pkgconfig
   - /share/man
+  - '*.la'
+  - '*.a'
 
 modules:
-  - name: gspell
-    modules:
-      - name: enchant
-        cleanup:
-          - /bin
-        sources:
-          - type: archive
-            url: https://github.com/AbiWord/enchant/releases/download/v2.8.16/enchant-2.8.16.tar.gz
-            sha256: d73162b5eff401a6397e1215e2b103bcef83f921c396c7f6b1394d2450d124e2
-            x-checker-data:
-              type: anitya
-              project-id: 6601
-              url-template: https://github.com/AbiWord/enchant/releases/download/v$version/enchant-$version.tar.gz
+  # Required by gspell
+  - name: enchant
     cleanup:
       - /bin
+    sources:
+      - type: archive
+        url: https://github.com/AbiWord/enchant/releases/download/v2.8.16/enchant-2.8.16.tar.gz
+        sha256: d73162b5eff401a6397e1215e2b103bcef83f921c396c7f6b1394d2450d124e2
+        x-checker-data:
+          type: anitya
+          project-id: 6601
+          url-template: https://github.com/AbiWord/enchant/releases/download/v$version/enchant-$version.tar.gz
+
+  - name: gspell
     buildsystem: meson
     config-opts:
       - -Dgspell_app=false
@@ -42,6 +41,8 @@ modules:
       - -Dgtk_doc=false
       - -Dtests=false
       - -Dinstall_tests=false
+    cleanup:
+      - /bin
     sources:
       - type: archive
         url: https://download.gnome.org/sources/gspell/1.14/gspell-1.14.3.tar.xz
@@ -51,18 +52,16 @@ modules:
           name: gspell
 
   - name: libical
-    cleanup:
-      - /lib/cmake
     buildsystem: cmake-ninja
     config-opts:
       - -DCMAKE_BUILD_TYPE=Release
-      - -DCMAKE_INSTALL_LIBDIR=lib
-      - -DBUILD_SHARED_LIBS:BOOL=ON
-      - -DICAL_GLIB=true
-      - -DGOBJECT_INTROSPECTION=true
-      - -DICAL_GLIB_VAPI=false
-      - -DICAL_BUILD_DOCS=false
+      - -DCMAKE_INSTALL_LIBDIR:PATH=/app/lib
+      - -DBUILD_SHARED_LIBS=On
+      - -DLIBICAL_BUILD_DOCS=False
+      - -DLIBICAL_CXX_BINDINGS=False
       - -DLIBICAL_JAVA_BINDINGS=False
+    cleanup:
+      - /lib/cmake
     sources:
       - type: archive
         url: https://github.com/libical/libical/releases/download/v4.0.2/libical-4.0.2.tar.gz
@@ -72,41 +71,48 @@ modules:
           project-id: 1637
           url-template: https://github.com/libical/libical/releases/download/v$version/libical-$version.tar.gz
 
-  - name: libnotify
-    buildsystem: meson
-    config-opts:
-      - -Dman=false
-      - -Dgtk_doc=false
-      - -Dtests=false
-    sources:
-      - type: archive
-        url: https://download.gnome.org/sources/libnotify/0.8/libnotify-0.8.8.tar.xz
-        sha256: 23420ef619dc2cb5aebad613f4823a2fa41c07e5a1d05628d40f6ec4b35bfddd
-        x-checker-data:
-          type: gnome
-          name: libnotify
-          stable-only: true
-
   - name: libmcrypt
     buildsystem: autotools
+    build-options:
+      cflags: -Wno-implicit-function-declaration -Wno-implicit-int
     config-opts:
       - --disable-static
     sources:
       - type: archive
         url: https://sourceforge.net/projects/mcrypt/files/Libmcrypt/2.5.8/libmcrypt-2.5.8.tar.gz
         sha256: e4eb6c074bbab168ac47b947c195ff8cef9d51a211cdd18ca9c9ef34d27a373e
+      - type: patch
+        paths:
+          - patches/libmcrypt-c23.patch
+          - patches/libmcrypt-fix-enigma.patch
       - type: shell
         commands:
           - cp -p /usr/share/automake-*/config.{sub,guess} .
 
   - name: mhash
     buildsystem: autotools
+    build-options:
+      cflags: -std=gnu17
     config-opts:
       - --disable-static
     sources:
       - type: archive
         url: https://sourceforge.net/projects/mhash/files/mhash/0.9.9.9/mhash-0.9.9.9.tar.bz2
         sha256: 56521c52a9033779154432d0ae47ad7198914785265e1f570cee21ab248dfef0
+        # Pathes are taken from Fedora: https://src.fedoraproject.org/rpms/mhash/blob/rawhide/f/mhash.spec
+      - type: patch
+        paths:
+          - patches/mhash-0.9.9.9-align.patch
+          - patches/mhash-0.9.9.9-force64bit-tiger.patch
+          - patches/mhash-0.9.9.9-fix-snefru-segfault.patch
+          - patches/mhash-0.9.9.9-fix-mem-leak.patch
+          - patches/mhash-0.9.9.9-fix-whirlpool-segfault.patch
+          - patches/mhash-0.9.9.9-autotools-namespace-stomping.patch
+          - patches/mhash-0.9.9.9-maxint.patch
+          - patches/mhash-0.9.9.9-alignment.patch
+          - patches/mhash-0.9.9.9-keygen_test_fix.patch
+          - patches/mhash-0.9.9-no-free-before-use.patch
+          - patches/mhash-0.9.9.9-cast-temp-64bit.patch
       - type: shell
         commands:
           - cp -p /usr/share/automake-*/config.{sub,guess} .
@@ -125,6 +131,8 @@ modules:
 
   - name: osmo
     buildsystem: autotools
+    build-options:
+      cflags: -Wno-implicit-function-declaration
     post-install:
       - install -Dm 644 ${FLATPAK_ID}.metainfo.xml ${FLATPAK_DEST}/share/metainfo/${FLATPAK_ID}.metainfo.xml
     sources:
@@ -135,5 +143,13 @@ modules:
           type: anitya
           project-id: 2576
           url-template: https://downloads.sourceforge.net/project/osmo-pim/osmo-pim/osmo-$version/osmo-$version.tar.gz
+      - type: patch
+        paths:
+          - patches/osmo-gcc-15.patch
+          - patches/osmo-libxml2.patch
+      - type: shell
+        commands:
+          - sed -i configure.ac -e 's|webkit2gtk-4.0|webkit2gtk-4.1|'
+          - autoreconf -vif
       - type: file
         path: net.sourceforge.osmo.metainfo.xml

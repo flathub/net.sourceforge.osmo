@@ -1,0 +1,29 @@
+Description: Use pkg-config to find libxml2
+Author: Maxim Gordienko <mgordienko@users.sourceforge.net>
+Bug-Debian: https://bugs.debian.org/949422
+Origin: upstream, https://sourceforge.net/p/osmo-pim/osmo/ci/843cf52c73f7fe9e89982b0795a206be1b90784d/
+Last-Update: 2022-09-27
+
+--- a/configure.ac
++++ b/configure.ac
+@@ -57,8 +57,7 @@
+ AM_PATH_GTK_3_0(3.10.0,,
+     AC_MSG_ERROR([GTK+ not found or too old (version < 3.10)]))
+ 
+-AM_PATH_XML2(2.0.0,,
+-    AC_MSG_ERROR([You do not appear to have libxml2 installed.]))
++PKG_CHECK_MODULES([XML], [libxml-2.0 >= 2.9])
+ 
+ PKG_CHECK_MODULES(GTHREAD, gthread-2.0 >= 2.6.0)
+ 
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -6,7 +6,7 @@
+ VERSION_MICRO := $(shell echo $(VERSION) | awk -F "." '{print $$3}')
+ AM_CPPFLAGS = -DREPO=$(ISREPO) -DREVISION=$(REVISION) -DLOCALEDIR=\"$(datadir)/locale\" -DDATADIR=\"$(datadir)\" \
+ 			  -DVERSION_MAJOR=\"$(VERSION_MAJOR)\" -DVERSION_MINOR=\"$(VERSION_MINOR)\" -DVERSION_MICRO=\"$(VERSION_MICRO)\" \
+-			  -DSOUNDSDIR=\"$(datadir)/sounds\" @GTK_CFLAGS@ @XML_CPPFLAGS@ -Wall -DGDK_DISABLE_DEPRECATION_WARNINGS \
++			  -DSOUNDSDIR=\"$(datadir)/sounds\" @GTK_CFLAGS@ @XML_CFLAGS@ -Wall -DGDK_DISABLE_DEPRECATION_WARNINGS \
+ 			  -DICONSDIR=\"$(datadir)/icons\" -DPIXMAPSDIR=\"$(datadir)/pixmaps\" \
+ 			  -DG_DISABLE_CAST_CHECKS
+ 

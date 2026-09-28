@@ -1,6 +1,6 @@
 app-id: net.sourceforge.osmo
 runtime: org.freedesktop.Platform
-runtime-version: '23.08'
+runtime-version: '26.08'
 sdk: org.freedesktop.Sdk
 rename-desktop-file: osmo.desktop
 rename-icon: osmo
@@ -20,20 +20,6 @@ cleanup:
 
 modules:
   - name: gspell
-    modules:
-      - name: enchant
-        cleanup:
-          - /bin
-        sources:
-          - type: archive
-            url: https://github.com/AbiWord/enchant/releases/download/v2.8.15/enchant-2.8.15.tar.gz
-            sha256: d3fd9e4170bfb5110b0bda577fe764a38fb606b3c25d2f0c3840234521ff1252
-            x-checker-data:
-              type: anitya
-              project-id: 6601
-              url-template: https://github.com/AbiWord/enchant/releases/download/v$version/enchant-$version.tar.gz
-    cleanup:
-      - /bin
     buildsystem: meson
     config-opts:
       - -Dgspell_app=false
@@ -42,17 +28,29 @@ modules:
       - -Dgtk_doc=false
       - -Dtests=false
       - -Dinstall_tests=false
+    cleanup:
+      - /bin
     sources:
       - type: archive
-        url: https://download.gnome.org/sources/gspell/1.14/gspell-1.14.3.tar.xz
-        sha256: e8b39c67556f75495362952f81ca241b5a3c17c75960b77fc93fa702c612a5a4
+        url: https://download.gnome.org/sources/gspell/1.14/gspell-1.14.5.tar.xz
+        sha256: 788783b56fc3d03283b3aa29302d0b958aeca88835e10b1ec61f19e0efc7e8a4
         x-checker-data:
           type: gnome
           name: gspell
+    modules:
+      - name: enchant
+        cleanup:
+          - /bin
+        sources:
+          - type: archive
+            url: https://github.com/AbiWord/enchant/releases/download/v2.8.21/enchant-2.8.21.tar.gz
+            sha256: dd2a762697c463148a8f59867089a5ebf2dd1449d869f93764b76c12bcf8acc0
+            x-checker-data:
+              type: anitya
+              project-id: 6601
+              url-template: https://github.com/AbiWord/enchant/releases/download/v$version/enchant-$version.tar.gz
 
   - name: libical
-    cleanup:
-      - /lib/cmake
     buildsystem: cmake-ninja
     config-opts:
       - -DCMAKE_BUILD_TYPE=Release
@@ -62,38 +60,32 @@ modules:
       - -DGOBJECT_INTROSPECTION=true
       - -DICAL_GLIB_VAPI=false
       - -DICAL_BUILD_DOCS=false
+      - -DLIBICAL_JAVA_BINDINGS=false
+    cleanup:
+      - /lib/cmake
     sources:
       - type: archive
-        url: https://github.com/libical/libical/releases/download/v3.0.20/libical-3.0.20.tar.gz
-        sha256: e73de92f5a6ce84c1b00306446b290a2b08cdf0a80988eca0a2c9d5c3510b4c2
+        url: https://github.com/libical/libical/releases/download/v4.0.5/libical-4.0.5.tar.gz
+        sha256: cc09a3ac41d60e6144e644bd3fcf97d47106d659c4a0b8965102581401e67c9c
         x-checker-data:
           type: anitya
           project-id: 1637
           url-template: https://github.com/libical/libical/releases/download/v$version/libical-$version.tar.gz
 
-  - name: libnotify
-    buildsystem: meson
-    config-opts:
-      - -Dman=false
-      - -Dgtk_doc=false
-      - -Dtests=false
-    sources:
-      - type: archive
-        url: https://download.gnome.org/sources/libnotify/0.8/libnotify-0.8.8.tar.xz
-        sha256: 23420ef619dc2cb5aebad613f4823a2fa41c07e5a1d05628d40f6ec4b35bfddd
-        x-checker-data:
-          type: gnome
-          name: libnotify
-          stable-only: true
-
   - name: libmcrypt
     buildsystem: autotools
     config-opts:
       - --disable-static
+    build-options:
+      cflags: -Wno-error=implicit-function-declaration
     sources:
       - type: archive
         url: https://sourceforge.net/projects/mcrypt/files/Libmcrypt/2.5.8/libmcrypt-2.5.8.tar.gz
         sha256: e4eb6c074bbab168ac47b947c195ff8cef9d51a211cdd18ca9c9ef34d27a373e
+      - type: patch
+        paths:
+          - patches/libmcrypt-0001-c99.patch
+          - patches/libmcrypt-0002-prototypes.patch
       - type: shell
         commands:
           - cp -p /usr/share/automake-*/config.{sub,guess} .
@@ -102,10 +94,25 @@ modules:
     buildsystem: autotools
     config-opts:
       - --disable-static
+    build-options:
+      cflags: -std=gnu18
     sources:
       - type: archive
         url: https://sourceforge.net/projects/mhash/files/mhash/0.9.9.9/mhash-0.9.9.9.tar.bz2
         sha256: 56521c52a9033779154432d0ae47ad7198914785265e1f570cee21ab248dfef0
+      - type: patch
+        paths:
+          - patches/mhash-0001-align.patch
+          - patches/mhash-0002-force64bit-tiger.patch
+          - patches/mhash-0003-fix-snefru-segfault.patch
+          - patches/mhash-0004-fix-mem-leak.patch
+          - patches/mhash-0005-fix-whirlpool-segfault.patch
+          - patches/mhash-0006-autotools-namespace-stomping.patch
+          - patches/mhash-0007-maxint.patch
+          - patches/mhash-0008-alignment.patch
+          - patches/mhash-0009-keygen_test_fix.patch
+          - patches/mhash-0010-no-free-before-use.patch
+          - patches/mhash-0011-cast-temp-64bit.patch
       - type: shell
         commands:
           - cp -p /usr/share/automake-*/config.{sub,guess} .
@@ -124,8 +131,11 @@ modules:
 
   - name: osmo
     buildsystem: autotools
+    autoreconf: true
+    build-options:
+      cflags: -Wno-error=implicit-function-declaration
     post-install:
-      - install -Dm 644 ${FLATPAK_ID}.metainfo.xml ${FLATPAK_DEST}/share/metainfo/${FLATPAK_ID}.metainfo.xml
+      - install -Dm 644 ${FLATPAK_ID}.metainfo.xml -t ${FLATPAK_DEST}/share/metainfo/
     sources:
       - type: archive
         url: https://downloads.sourceforge.net/project/osmo-pim/osmo-pim/osmo-0.4.4/osmo-0.4.4.tar.gz
@@ -134,5 +144,14 @@ modules:
           type: anitya
           project-id: 2576
           url-template: https://downloads.sourceforge.net/project/osmo-pim/osmo-pim/osmo-$version/osmo-$version.tar.gz
+      - type: patch
+        paths:
+          - patches/osmo-0001-gcc-15.patch
+          - patches/osmo-0002-fix-delete-event-callback-return-type.patch
+          - patches/osmo-0003-webkit4.1.patch
+          - patches/osmo-0004-libical-4.patch
       - type: file
         path: net.sourceforge.osmo.metainfo.xml
+      - type: shell
+        commands:
+          - touch configure aclocal.m4 Makefile.in
